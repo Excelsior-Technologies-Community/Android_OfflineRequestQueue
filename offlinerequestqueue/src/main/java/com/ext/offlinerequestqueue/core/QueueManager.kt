@@ -3,6 +3,7 @@ package com.ext.offlinerequestqueue.core
 import android.content.Context
 import androidx.work.*
 import com.ext.offlinerequestqueue.model.QueuedRequest
+import com.ext.offlinerequestqueue.network.NetworkMonitor
 import com.ext.offlinerequestqueue.storage.RequestStorage
 import com.ext.offlinerequestqueue.worker.RetryWorker
 import java.util.concurrent.TimeUnit
@@ -22,11 +23,16 @@ object QueueManager {
 
     fun enqueue(context: Context, request: QueuedRequest) {
 
-        queue.add(request)
+        if (NetworkMonitor.isInternetAvailable(context)) {
 
-        storage.save(queue)
+            scheduleRetry(context)
 
-        scheduleRetry(context)
+        } else {
+
+            queue.add(request)
+
+            storage.save(queue)
+        }
     }
 
     fun getQueue(): MutableList<QueuedRequest> {
@@ -44,7 +50,7 @@ object QueueManager {
 
         val workRequest =
             OneTimeWorkRequestBuilder<RetryWorker>()
-                .setInitialDelay(5, TimeUnit.SECONDS)
+                .setInitialDelay(2, TimeUnit.SECONDS)
                 .build()
 
         WorkManager

@@ -3,31 +3,24 @@ package com.ext.offlinerequestqueue.network
 import android.Manifest
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.Network
+import android.net.NetworkCapabilities
 import androidx.annotation.RequiresPermission
-import com.ext.offlinerequestqueue.core.QueueManager
 
-class NetworkMonitor(context: Context) {
-
-    private val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
+object NetworkMonitor {
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    fun startMonitoring(context: Context) {
+    fun isInternetAvailable(context: Context): Boolean {
 
-        connectivityManager.registerDefaultNetworkCallback(
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE)
+                    as ConnectivityManager
 
-            object : ConnectivityManager.NetworkCallback() {
+        val network = connectivityManager.activeNetwork ?: return false
 
-                override fun onAvailable(network: Network) {
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(network)
+                ?: return false
 
-                    QueueManager.getQueue().forEach {
-
-                        QueueManager.enqueue(context, it)
-                    }
-                }
-            }
-        )
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }
