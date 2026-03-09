@@ -39,7 +39,7 @@ dependencyResolutionManagement {
 
 ```gradle
 dependencies {
-	        implementation 'com.github.Excelsior-Technologies-Community:Android_SecureStorageHelper:1.0.0'
+	        implementation 'com.github.Excelsior-Technologies-Community:Android_OfflineRequestQueue:1.0.0'
 	}
 ```
 
